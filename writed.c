@@ -12,7 +12,7 @@
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.3 1990-04-05 18:31:44 epeisach Exp $";
+static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.4 1991-08-02 14:15:05 epeisach Exp $";
 #endif not lint
 
 #ifndef lint
@@ -65,7 +65,11 @@ main(argc, argv)
 	/* Put the socket on stdin, stdout, and stderr */
 	dup2(0, 1);
 	dup2(0, 2);
+#if (defined(vax) && !defined(ultrix) || defined(ibm032))
 	execv("/bin/write", av);
+#else
+	execv("/usr/athena/bin/write", av);
+#endif
 	_exit(1);
 }
 
