@@ -15,7 +15,7 @@
 
 /* This is the client side of the networked write system. */
 
-static const char rcsid[] = "$Id: main.c,v 1.5 2001-01-31 08:16:45 zacheiss Exp $";
+static const char rcsid[] = "$Id: main.c,v 1.6 2002-07-20 19:29:03 zacheiss Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -99,7 +99,7 @@ int main(int argc, char **argv)
 	  perror("write: getpeername failed");
 	  exit(1);
 	}
-      h = gethostbyaddr((char *)&sin.sin_addr, sinlen, AF_INET);
+      h = gethostbyaddr((char *)&sin.sin_addr, sizeof(sin.sin_addr), AF_INET);
       if (!h)
 	{
 	  fprintf(stderr, "write: Can't determine your hostname.\n");
