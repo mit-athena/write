@@ -15,7 +15,7 @@
 
 /* This is the client side of the networked write system. */
 
-static const char rcsid[] = "$Id: main.c,v 1.3 2000-02-25 18:42:33 ghudson Exp $";
+static const char rcsid[] = "$Id: main.c,v 1.4 2000-04-12 22:05:12 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -52,13 +52,10 @@ struct utmp *getutxline(const struct utmp *line);
 void setutxent(void);
 #endif /* HAVE_GETUTXENT */
 
-#ifndef HAVE_INET_ATON
-static int inet_aton(const char *str, struct in_addr *addr);
-#endif
-
 static int oktty(char *tty);
 static void eof(int);
 static int read_line(FILE *fp, char **buf, int *bufsize);
+static int inet_aton_wrapper(const char *str, struct in_addr *addr);
 
 int fromnet, tonet;
 FILE *f;
@@ -187,7 +184,7 @@ int main(int argc, char **argv)
 	{
 	  struct in_addr addr;
 
-	  if (inet_aton(hishost, &addr))
+	  if (inet_aton_wrapper(hishost, &addr))
 	    h = gethostbyaddr((char *)&addr, sizeof(addr), AF_INET);
 
 	  if (!h)
@@ -485,14 +482,16 @@ void setutxent(void)
 }
 #endif
 
-#ifndef HAVE_INET_ATON
-#ifndef INADDR_NONE
+#if !defined(HAVE_INET_ATON) && !defined(INADDR_NONE)
 #define	INADDR_NONE 0xffffffff
 #endif
 
-static int inet_aton(const char *str, struct in_addr *addr)
+static int inet_aton_wrapper(const char *str, struct in_addr *addr)
 {
+#ifdef HAVE_INET_ATON
+  return inet_aton(str, addr);
+#else
   addr->s_addr = inet_addr(str);
   return (addr->s_addr != INADDR_NONE || strcmp(str, "255.255.255.255") == 0);
-}
 #endif
+}
