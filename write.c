@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.12 1994-08-14 18:05:37 cfields Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.13 1995-09-29 22:56:59 cfields Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.12 1994-08-14 18:05:37 cfields Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.13 1995-09-29 22:56:59 cfields Exp $";
 #endif lint
 
 #ifndef	lint
@@ -16,19 +16,17 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 
 #include <stdio.h>
 #include <ctype.h>
+#include <string.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <signal.h>
 #include <utmp.h>
 #include <time.h>
 #include <sys/time.h>
-#include	<sys/socket.h>
-#include	<netinet/in.h>
-#include	<netdb.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+#include <netdb.h>
 #include <pwd.h>
-#ifdef sun
-#include <strings.h>
-#endif
 
 #define	NMAX	sizeof(ubuf.ut_name)
 #define	LMAX	sizeof(ubuf.ut_line)
@@ -57,9 +55,6 @@ struct passwd *pwdent;
 FILE	*tf;
 int	logcnt;
 char	*ttyname();
-#ifndef sun
-char	*rindex();
-#endif
 int	eof();
 int	timout();
 char	*getenv();
@@ -85,7 +80,7 @@ main(argc, argv)
 	me = mebuf;
 	if ((argc > 3) && (getuid() == 0) &&
 	    (strcmp("-f", argv[1]) == 0) &&
-	    (mytty = rindex(argv[2], '@'))) {
+	    (mytty = strrchr(argv[2], '@'))) {
 		me = argv[2];
 		*mytty++ = '\0';
 		netme = 1;
@@ -97,7 +92,7 @@ main(argc, argv)
 		exit(1);
 	}
 	him = argv[1];
-	if ((!netme) && (hishost = rindex(him, '@'))) {
+	if ((!netme) && (hishost = strrchr(him, '@'))) {
 		*hishost++ = '\0';
 		hp = gethostbyname(hishost);
 		if (hp == NULL) {
@@ -146,7 +141,7 @@ main(argc, argv)
 		if (!suser)
 		  exit(1);
 	    }
-	    mytty = rindex(mytty, '/') + 1;
+	    mytty = strrchr(mytty, '/') + 1;
 	}
 	if (histtya) {
 		strcpy(histty, "/dev/");
@@ -155,7 +150,7 @@ main(argc, argv)
 	while (fread((char *)&ubuf, sizeof(ubuf), 1, uf) == 1) {
 		if (ubuf.ut_name[0] == '\0')
 			continue;
-#if defined(_AIX)
+#if defined(_AIX) || defined(SYSV)
 		if (ubuf.ut_type != USER_PROCESS)
 			continue;
 #endif
@@ -268,6 +263,10 @@ cont:
 			if (buf[0] == '\n') break;
 			write(1, buf, strlen(buf));
 		}
+#ifdef SYSV
+		rewind(tf); /* See the man page for fdopen(). write
+			       won't work on the SGI without this. */
+#endif
 	} else {
 	    if (access(histty, 0) < 0) {
 		fprintf(stderr, "write: No such tty\n");
@@ -275,7 +274,7 @@ cont:
 	    }
 	    signal(SIGALRM, timout);
 	    alarm(5);
-#if !defined(ultrix) && !defined(SOLARIS)
+#if !defined(ultrix) && !defined(SYSV)
 	    if (setpgrp(0,0))
 	    if (setpgrp())
 		 perror("setpgrp 0");
@@ -285,7 +284,7 @@ cont:
 		fprintf(stderr, "write: Permission denied\n");
 		exit(1);
 	    }
-#ifndef SOLARIS
+#ifndef SYSV
 	    if (setpgrp(0,getpid()))
 		 perror("setpgrp !0");
 #endif
@@ -306,8 +305,8 @@ cont:
 	    }
 	    fflush(tf);
 	    fds = fileno(tf);
-
 	}
+
 	for (;;) {
 		char buf[BUFSIZ];
 		register char *bp;
@@ -399,5 +398,9 @@ sigs(sig)
 	register int i;
 
 	for (i=0; signum[i]; i++)
+#ifdef SYSV
+		sigset(signum[i], sig);
+#else
 		signal(signum[i], sig);
+#endif
 }
