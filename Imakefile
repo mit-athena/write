@@ -1,6 +1,6 @@
-# $Id: Imakefile,v 1.4 1992-01-10 16:41:29 probe Exp $
+# $Id: Imakefile,v 1.5 1992-05-08 11:10:09 epeisach Exp $
 
-#if defined(vax) || defined(ibm032) || defined(ultrix)
+#if (defined(vax) && !defined(ultrix)) || defined(ibm032) 
 BINDIR=/bin
 #else
 BINDIR=$(ATHBINDIR)
