@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.16 1998-01-21 21:58:11 ghudson Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.17 1998-07-25 21:09:33 ghudson Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.16 1998-01-21 21:58:11 ghudson Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.17 1998-07-25 21:09:33 ghudson Exp $";
 #endif lint
 
 #ifndef	lint
@@ -247,7 +247,7 @@ cont:
 			perror("socket");
 			exit(1);
 		}
-		if (connect(fds, (char *)&sin, sizeof (sin)) < 0) {
+		if (connect(fds, (struct sockaddr *)&sin, sizeof (sin)) < 0) {
 			perror("connect");
 			close(fds);
 			exit(1);
