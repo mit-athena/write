@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.3 1986-12-12 16:25:45 treese Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.4 1987-07-03 17:52:23 ens Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.3 1986-12-12 16:25:45 treese Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.4 1987-07-03 17:52:23 ens Exp $";
 #endif lint
 
 #ifndef	lint
@@ -255,11 +255,15 @@ cont:
 	    }
 	    signal(SIGALRM, timout);
 	    alarm(5);
+	    if (setpgrp(0,0))
+		 perror("setpgrp 0");
 	    if (stat(histty, &stbuf) < 0 || (stbuf.st_mode&020) == 0
 			|| (tf = fopen(histty, "w")) == NULL) {
 		fprintf(stderr, "write: Permission denied\n");
 		exit(1);
 	    }
+	    if (setpgrp(0,getpid()))
+		 perror("setpgrp !0");
 	    alarm(0);
 	    sigs(eof);
 	    if (netme) {
