@@ -15,7 +15,7 @@
 
 /* This is the client side of the networked write system. */
 
-static const char rcsid[] = "$Id: main.c,v 1.1 1999-10-16 20:08:07 danw Exp $";
+static const char rcsid[] = "$Id: main.c,v 1.2 1999-10-30 19:05:05 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -50,6 +50,10 @@ struct utmp *getutxent(void);
 struct utmp *getutxline(const struct utmp *line);
 void setutxent(void);
 #endif /* HAVE_GETUTXENT */
+
+#ifndef HAVE_INET_ATON
+static int inet_aton(const char *str, struct in_addr *addr);
+#endif
 
 static int oktty(char *tty);
 static void eof(int);
@@ -477,5 +481,17 @@ void setutxent(void)
     close(utfd);
 
   utfd = open(UTMP_FILE, O_RDONLY);
+}
+#endif
+
+#ifndef HAVE_INET_ATON
+#ifndef INADDR_NONE
+#define	INADDR_NONE 0xffffffff
+#endif
+
+static int inet_aton(const char *str, struct in_addr *addr)
+{
+  addr->s_addr = inet_addr(str);
+  return (addr->s_addr != INADDR_NONE || strcmp(str, "255.255.255.255") == 0);
 }
 #endif
