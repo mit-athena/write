@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.2 1986-09-05 10:58:27 jtkohl Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.3 1986-12-12 16:25:45 treese Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.2 1986-09-05 10:58:27 jtkohl Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.3 1986-12-12 16:25:45 treese Exp $";
 #endif lint
 
 #ifndef	lint
@@ -255,7 +255,8 @@ cont:
 	    }
 	    signal(SIGALRM, timout);
 	    alarm(5);
-	    if ((tf = fopen(histty, "w")) == NULL) {
+	    if (stat(histty, &stbuf) < 0 || (stbuf.st_mode&020) == 0
+			|| (tf = fopen(histty, "w")) == NULL) {
 		fprintf(stderr, "write: Permission denied\n");
 		exit(1);
 	    }
