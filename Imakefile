@@ -1,10 +1,19 @@
-# $Id: Imakefile,v 1.3 1991-07-04 23:45:23 probe Exp $
+# $Id: Imakefile,v 1.4 1992-01-10 16:41:29 probe Exp $
 
-#if defined(vax) && !defined(ultrix) || defined(ibm032)
-DEST=/bin
+#if defined(vax) || defined(ibm032) || defined(ultrix)
+BINDIR=/bin
 #else
-DEST=$(ATHBINDIR)
+BINDIR=$(ATHBINDIR)
 #endif
 
+INSTFLAGS= -m 2755 -g tty
+#if defined(_AIX)
+INSTFLAGS=
+#endif
+
+DEFINES= -DWRITE_PROG=\"$(BINDIR)/write\"
+
 build_program(write,write.o,,)
-install_program(write,-g tty -m 2755,$(DEST)/write)
+install_program(write,$(INSTFLAGS),$(BINDIR)/write)
+
+SimpleProgram(writed,writed.o,,$(ATHETCDIR)/writed)
