@@ -1,4 +1,4 @@
-# $Id: Imakefile,v 1.5 1992-05-08 11:10:09 epeisach Exp $
+# $Id: Imakefile,v 1.6 1997-01-31 23:04:16 ghudson Exp $
 
 #if (defined(vax) && !defined(ultrix)) || defined(ibm032) 
 BINDIR=/bin
@@ -6,7 +6,7 @@ BINDIR=/bin
 BINDIR=$(ATHBINDIR)
 #endif
 
-INSTFLAGS= -m 2755 -g tty
+INSTFLAGS= -m 2755 -o root -g tty
 #if defined(_AIX)
 INSTFLAGS=
 #endif
