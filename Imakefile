@@ -1,23 +1,19 @@
-#
-#	Makefile for write
-#
-DESTDIR=
-CFLAGS= -O
 
 PROGRAM=	write
 SRCS=		write.c
-LIBS=		
 
-all:: ${PROGRAM}
-
-${PROGRAM}::	${SRCS}
-	${CC} ${CFLAGS} -o $@ $@.c ${LIBS}
-
-install::
-#ifndef ultrix
-	install -g tty -m 2755 -s ${PROGRAM} ${DESTDIR}/bin/${PROGRAM}
+#ifdef ultrix
+DEST=/usr/bin
 #else
-	install -m 755 -s ${PROGRAM} ${DESTDIR}/usr/bin/${PROGRAM}
+DEST=/bin
+#endif
+
+build_program(write,write.c,,)
+install_program(write,-g tty -m 2755,$(DEST)/write)
+
+
+#ifdef ultrix
+install::
 	rm -f ${DESTDIR}/bin/${PROGRAM}
 	ln -s ../usr/bin/${PROGRAM} ${DESTDIR}/bin/${PROGRAM}
 #endif
