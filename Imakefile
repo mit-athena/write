@@ -1,4 +1,4 @@
-# $Id: Imakefile,v 1.6 1997-01-31 23:04:16 ghudson Exp $
+# $Id: Imakefile,v 1.6.8.1 1999-11-09 16:28:36 tb Exp $
 
 #if (defined(vax) && !defined(ultrix)) || defined(ibm032) 
 BINDIR=/bin
@@ -13,6 +13,8 @@ INSTFLAGS=
 
 DEFINES= -DWRITE_PROG=\"$(BINDIR)/write\"
 
+create_dir($(BINDIR))
+create_dir($(ATHETCDIR))
 build_program(write,write.o,,)
 install_program(write,$(INSTFLAGS),$(BINDIR)/write)
 
