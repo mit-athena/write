@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.14 1995-11-30 19:48:15 miki Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.15 1997-02-11 18:23:09 ghudson Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.14 1995-11-30 19:48:15 miki Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.15 1997-02-11 18:23:09 ghudson Exp $";
 #endif lint
 
 #ifndef	lint
@@ -27,6 +27,7 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #include <netinet/in.h>
 #include <netdb.h>
 #include <pwd.h>
+#include <sys/param.h>
 
 #define	NMAX	sizeof(ubuf.ut_name)
 #define	LMAX	sizeof(ubuf.ut_line)
@@ -106,7 +107,8 @@ main(argc, argv)
 				printf("unknown host: %s\n", hishost);
 				exit(1);
 			}
-			strcpy(namebuf, hishost);
+			strncpy(namebuf, hishost, sizeof(namebuf) - 1);
+			namebuf[sizeof(namebuf) - 1] = 0;
 			def.h_name = namebuf;
 			def.h_addr = (char *)&defaddr;
 			def.h_length = sizeof (struct in_addr);
@@ -145,7 +147,8 @@ main(argc, argv)
 	}
 	if (histtya) {
 		strcpy(histty, "/dev/");
-		strcat(histty, histtya);
+		strncpy(histty + 5, histtya, sizeof(histty) - 6);
+		histty[sizeof(histty) - 1] = 0;
 	}
 	while (fread((char *)&ubuf, sizeof(ubuf), 1, uf) == 1) {
 		if (ubuf.ut_name[0] == '\0')
@@ -196,7 +199,6 @@ main(argc, argv)
 	nomat:
 		;
 	}
-	fclose(uf);
 	if (!nethim) { 
 	    if (logcnt==0) {
 		fprintf(stderr, "write: %s not logged in%s\n", him,
@@ -297,7 +299,7 @@ cont:
 		 "\r\nMessage from %s on %s at %d:%02d ...\r\n\007\007\007",
 		 me, mytty, localclock->tm_hour, localclock->tm_min);
 	    } else
-	    { char hostname[32];
+	    { char hostname[MAXHOSTNAMELEN + 1];
 	      gethostname(hostname, sizeof (hostname));
 	      fprintf(tf,
 		 "\r\nMessage from %s@%s on %s at %d:%02d ...\r\n\007\007\007",
