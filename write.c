@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.9 1993-02-02 06:25:38 probe Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.10 1993-04-29 18:22:57 vrt Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.9 1993-02-02 06:25:38 probe Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.10 1993-04-29 18:22:57 vrt Exp $";
 #endif lint
 
 #ifndef	lint
@@ -271,7 +271,11 @@ cont:
 	    signal(SIGALRM, timout);
 	    alarm(5);
 #ifndef ultrix
+#ifndef SOLARIS
 	    if (setpgrp(0,0))
+#else
+	    if (setpgrp())
+#endif
 		 perror("setpgrp 0");
 #endif
 	    if (stat(histty, &stbuf) < 0 || (stbuf.st_mode&020) == 0
@@ -279,7 +283,11 @@ cont:
 		fprintf(stderr, "write: Permission denied\n");
 		exit(1);
 	    }
+#ifndef SOLARIS
 	    if (setpgrp(0,getpid()))
+#else
+	    if (setpgrp())
+#endif
 		 perror("setpgrp !0");
 	    alarm(0);
 	    sigs(eof);
