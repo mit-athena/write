@@ -15,7 +15,7 @@
 
 /* This is the client side of the networked write system. */
 
-static const char rcsid[] = "$Id: main.c,v 1.2 1999-10-30 19:05:05 ghudson Exp $";
+static const char rcsid[] = "$Id: main.c,v 1.3 2000-02-25 18:42:33 ghudson Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -39,6 +39,7 @@ static const char rcsid[] = "$Id: main.c,v 1.2 1999-10-30 19:05:05 ghudson Exp $
 #include <utmpx.h>
 #else /* HAVE_GETUTXENT */
 #include <utmp.h>
+#define ut_user ut_name
 #ifndef UTMP_FILE
 #ifdef _PATH_UTMP
 #define UTMP_FILE _PATH_UTMP
@@ -143,9 +144,9 @@ int main(int argc, char **argv)
       ut = getutxline(&line);
       if (ut)
 	{
-	  me = malloc(sizeof(ut->ut_name) + 1);
-	  strncpy(me, ut->ut_name, sizeof(ut->ut_name));
-	  me[sizeof(ut->ut_name)] = '\0';
+	  me = malloc(sizeof(ut->ut_user) + 1);
+	  strncpy(me, ut->ut_user, sizeof(ut->ut_user));
+	  me[sizeof(ut->ut_user)] = '\0';
 	}
      else
 	{
@@ -211,7 +212,7 @@ int main(int argc, char **argv)
 	  strncpy(line.ut_line, histtyname, sizeof(line.ut_line));
 	  setutxent();
 	  ut = getutxline(&line);
-	  if (!ut || strncmp(ut->ut_name, him, sizeof(ut->ut_name)))
+	  if (!ut || strncmp(ut->ut_user, him, sizeof(ut->ut_user)))
 	    {
 	      fprintf(stderr, "write: %s is not logged in on %s",
 		      him, histtyname);
@@ -237,11 +238,11 @@ int main(int argc, char **argv)
       /* Find the tty(s) the user is logged in on. */
       int found = 0, nomsg = 0;
 
-      histty = malloc(6 + sizeof(ut->ut_name));
+      histty = malloc(6 + sizeof(ut->ut_user));
       setutxent();
       while ((ut = getutxent()))
 	{
-	  if (!strncmp(him, ut->ut_name, sizeof(ut->ut_name)))
+	  if (!strncmp(him, ut->ut_user, sizeof(ut->ut_user)))
 	    {
 	      if (!found || nomsg)
 		{
