@@ -1,10 +1,9 @@
 /*
- *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.17 1998-07-25 21:09:33 ghudson Exp $
+ *	$Id: write.c,v 1.18 1999-01-22 23:15:32 ghudson Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.17 1998-07-25 21:09:33 ghudson Exp $";
+static char *rcsid_write_c = "$Id: write.c,v 1.18 1999-01-22 23:15:32 ghudson Exp $";
 #endif lint
 
 #ifndef	lint

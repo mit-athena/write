@@ -12,7 +12,7 @@
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.5 1992-01-10 16:40:47 probe Exp $";
+static char *rcsid_writed_c = "$Id: writed.c,v 1.6 1999-01-22 23:15:33 ghudson Exp $";
 #endif not lint
 
 #ifndef lint
