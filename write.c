@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.7 1991-02-27 12:12:02 epeisach Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.8 1992-02-11 10:19:45 probe Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.7 1991-02-27 12:12:02 epeisach Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.8 1992-02-11 10:19:45 probe Exp $";
 #endif lint
 
 #ifndef	lint
@@ -149,6 +149,10 @@ main(argc, argv)
 	while (fread((char *)&ubuf, sizeof(ubuf), 1, uf) == 1) {
 		if (ubuf.ut_name[0] == '\0')
 			continue;
+#if defined(_AIX)
+		if (ubuf.ut_type != USER_PROCESS)
+			continue;
+#endif
 		if ((!netme) && strcmp(ubuf.ut_line, mytty)==0) {
 			for (i=0; i<NMAX; i++) {
 				c1 = ubuf.ut_name[i];
