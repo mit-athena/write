@@ -22,13 +22,6 @@ clean:
 
 
 depend: 
-	makedepend -o "" -s "# DO NOT DELETE THIS LINE -- make depend uses it"\
+	touch Make.depend; makedepend -fMake.depend -o "" -s "# DO NOT DELETE THIS LINE -- make depend uses it"\
 		${CFLAGS} ${SRCS}
 
-# DO NOT DELETE THIS LINE -- make depend uses it
-
-write: /usr/include/stdio.h /usr/include/ctype.h /usr/include/sys/types.h
-write: /usr/include/sys/stat.h /usr/include/signal.h /usr/include/utmp.h
-write: /usr/include/sys/time.h /usr/include/sys/time.h
-write: /usr/include/sys/socket.h /usr/include/netinet/in.h
-write: /usr/include/netdb.h /usr/include/pwd.h
