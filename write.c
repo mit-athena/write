@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.8 1992-02-11 10:19:45 probe Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.9 1993-02-02 06:25:38 probe Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.8 1992-02-11 10:19:45 probe Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.9 1993-02-02 06:25:38 probe Exp $";
 #endif lint
 
 #ifndef	lint
@@ -20,6 +20,7 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #include <sys/stat.h>
 #include <signal.h>
 #include <utmp.h>
+#include <time.h>
 #include <sys/time.h>
 #include	<sys/socket.h>
 #include	<netinet/in.h>
