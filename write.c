@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.11 1993-07-22 19:31:25 vrt Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.12 1994-08-14 18:05:37 cfields Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.11 1993-07-22 19:31:25 vrt Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.12 1994-08-14 18:05:37 cfields Exp $";
 #endif lint
 
 #ifndef	lint
@@ -26,6 +26,9 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #include	<netinet/in.h>
 #include	<netdb.h>
 #include <pwd.h>
+#ifdef sun
+#include <strings.h>
+#endif
 
 #define	NMAX	sizeof(ubuf.ut_name)
 #define	LMAX	sizeof(ubuf.ut_line)
@@ -54,7 +57,9 @@ struct passwd *pwdent;
 FILE	*tf;
 int	logcnt;
 char	*ttyname();
+#ifndef sun
 char	*rindex();
+#endif
 int	eof();
 int	timout();
 char	*getenv();
