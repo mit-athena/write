@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.10 1993-04-29 18:22:57 vrt Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.11 1993-07-22 19:31:25 vrt Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.10 1993-04-29 18:22:57 vrt Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.11 1993-07-22 19:31:25 vrt Exp $";
 #endif lint
 
 #ifndef	lint
@@ -270,12 +270,9 @@ cont:
 	    }
 	    signal(SIGALRM, timout);
 	    alarm(5);
-#ifndef ultrix
-#ifndef SOLARIS
+#if !defined(ultrix) && !defined(SOLARIS)
 	    if (setpgrp(0,0))
-#else
 	    if (setpgrp())
-#endif
 		 perror("setpgrp 0");
 #endif
 	    if (stat(histty, &stbuf) < 0 || (stbuf.st_mode&020) == 0
@@ -285,10 +282,8 @@ cont:
 	    }
 #ifndef SOLARIS
 	    if (setpgrp(0,getpid()))
-#else
-	    if (setpgrp())
-#endif
 		 perror("setpgrp !0");
+#endif
 	    alarm(0);
 	    sigs(eof);
 	    if (netme) {
