@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.13 1995-09-29 22:56:59 cfields Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.14 1995-11-30 19:48:15 miki Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.13 1995-09-29 22:56:59 cfields Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.14 1995-11-30 19:48:15 miki Exp $";
 #endif lint
 
 #ifndef	lint
@@ -232,7 +232,7 @@ cont:
 			exit(1);
 		}
 		sin.sin_family = hp->h_addrtype;
-		bcopy(hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
+                memmove((char *)&sin.sin_addr, hp->h_addr, hp->h_length);
 		sin.sin_port = sp->s_port;
 		fds = socket(hp->h_addrtype, SOCK_STREAM, 0);
 		if (fds < 0) {
