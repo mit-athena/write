@@ -1,0 +1,35 @@
+#
+#	Makefile for write
+#
+DESTDIR=
+CFLAGS= -O
+
+PROGRAM=	write
+SRCS=		write.c
+LIBS=		
+
+all:: ${PROGRAM}
+
+${PROGRAM}::	${SRCS}
+	${CC} ${CFLAGS} -o $@ $@.c ${LIBS}
+
+install::
+#ifndef ultrix
+	install -g tty -m 2755 -s ${PROGRAM} ${DESTDIR}/bin/${PROGRAM}
+#else
+	install -m 755 -s ${PROGRAM} ${DESTDIR}/usr/bin/${PROGRAM}
+	rm -f ${DESTDIR}/bin/${PROGRAM}
+	ln -s ../usr/bin/${PROGRAM} ${DESTDIR}/bin/${PROGRAM}
+#endif
+
+tags::
+	ctags -tdw *.c 
+
+clean::
+	rm -f ${PROGRAM} a.out core *.s *.o made
+
+
+depend:: 
+	touch Make.depend; makedepend -fMake.depend -o "" -s "# DO NOT DELETE THIS LINE -- make depend uses it"\
+		${CFLAGS} ${SRCS}
+
