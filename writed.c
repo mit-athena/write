@@ -12,7 +12,7 @@
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.2 1985-12-08 22:03:31 wesommer Exp $";
+static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.3 1990-04-05 18:31:44 epeisach Exp $";
 #endif not lint
 
 #ifndef lint
@@ -32,11 +32,10 @@ main(argc, argv)
 	char *argv[];
 {
 	register char *sp;
-	char line[512];
+	char line[BUFSIZ];
 	struct sockaddr_in sin;
-	int i, p[2], pid, status;
-	FILE *fp;
-	char *av[10];
+	int i;
+	char *av[10]; /* space for 9 arguments, plus terminating null */
 
 
 	i = sizeof (sin);
@@ -44,7 +43,7 @@ main(argc, argv)
 		fatal(argv[0], "getpeername");
 	line[0] = '\0';
 
-	gets(line);
+	fgets(line, BUFSIZ, stdin);
 	sp = line;
 	av[0] = "write";
 	av[1] = "-f";
@@ -55,6 +54,10 @@ main(argc, argv)
 		if (!*sp)
 			break;
 		av[i++] = sp;
+		if (i == 9)
+			/* past end of av space -- throw out the rest */
+			/* of the args				      */
+			break;
 		while (*sp && !isspace(*sp)) sp++;
 		if (*sp) *sp++ = '\0';
 	}
