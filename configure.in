@@ -1,0 +1,9 @@
+dnl Process this file with autoconf to produce a configure script.
+AC_INIT(main.c)
+
+AC_PROG_CC
+AC_PROG_INSTALL
+
+AC_CHECK_FUNCS(getutxent)
+
+AC_OUTPUT(Makefile)
