@@ -15,7 +15,7 @@
 
 /* This is the client side of the networked write system. */
 
-static const char rcsid[] = "$Id: main.c,v 1.4 2000-04-12 22:05:12 ghudson Exp $";
+static const char rcsid[] = "$Id: main.c,v 1.5 2001-01-31 08:16:45 zacheiss Exp $";
 
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -324,6 +324,11 @@ int main(int argc, char **argv)
       struct tm *tm = localtime(&now);
 
       f = fopen(histty, "w");
+      if (!f)
+	{
+	  fprintf(stderr, "write: unable to open %s for writing\n", histty);
+	  exit(1); 
+	}
       if (fromnet)
 	{
 	  printf("\n");
