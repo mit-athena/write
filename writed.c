@@ -12,7 +12,7 @@
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.1 1985-12-06 23:31:08 wesommer Exp $";
+static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.2 1985-12-08 22:03:31 wesommer Exp $";
 #endif not lint
 
 #ifndef lint
@@ -38,6 +38,7 @@ main(argc, argv)
 	FILE *fp;
 	char *av[10];
 
+
 	i = sizeof (sin);
 	if (getpeername(0, &sin, &i) < 0)
 		fatal(argv[0], "getpeername");
@@ -58,31 +59,11 @@ main(argc, argv)
 		if (*sp) *sp++ = '\0';
 	}
 	av[i] = 0;
-	if (pipe(p) < 0)
-		fatal(argv[0], "pipe");
-	if ((pid = fork()) == 0) {
-		close(p[0]);
-		if (p[1] != 1) {
-			dup2(p[1], 1);
-			close(p[1]);
-		}
-		execv("/bin/write", av);
-		_exit(1);
-	}
-	if (pid == -1)
-		fatal(argv[0], "fork");
-	close(p[1]);
-	if ((fp = fdopen(p[0], "r")) == NULL)
-		fatal(argv[0], "fdopen");
-	while ((i = getc(fp)) != EOF) {
-		if (i == '\n')
-			putchar('\r');
-		putchar(i);
-	}
-	fclose(fp);
-	while ((i = wait(&status)) != pid && i != -1)
-		;
-	return(0);
+	/* Put the socket on stdin, stdout, and stderr */
+	dup2(0, 1);
+	dup2(0, 2);
+	execv("/bin/write", av);
+	_exit(1);
 }
 
 fatal(prog, s)
