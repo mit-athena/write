@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.6 1991-02-26 17:20:06 epeisach Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.7 1991-02-27 12:12:02 epeisach Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.6 1991-02-26 17:20:06 epeisach Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.7 1991-02-27 12:12:02 epeisach Exp $";
 #endif lint
 
 #ifndef	lint
@@ -57,6 +57,10 @@ char	*rindex();
 int	eof();
 int	timout();
 char	*getenv();
+
+#ifdef _AIX
+#define setpgrp setpgid
+#endif
 
 main(argc, argv)
 	int argc;
@@ -199,6 +203,12 @@ main(argc, argv)
 			"write: %s logged in more than once ... writing to %s\n",
 			him, histty+5);
 	    }
+#ifdef _AIX
+	    /* This appears to flush the stderr buffer on the PS/2 so that
+	       both sides of the connection don't receive the message. 
+	       Wierd. - Ezra */
+	    fflush(stderr);
+#endif
 	}
 cont:
 	fclose(uf);
@@ -283,6 +293,7 @@ cont:
 	    }
 	    fflush(tf);
 	    fds = fileno(tf);
+
 	}
 	for (;;) {
 		char buf[BUFSIZ];
