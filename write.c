@@ -1,3 +1,12 @@
+/*
+ *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.2 1986-09-05 10:58:27 jtkohl Exp $
+ */
+
+#ifndef lint
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.2 1986-09-05 10:58:27 jtkohl Exp $";
+#endif lint
+
 #ifndef	lint
 static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #endif
@@ -12,6 +21,10 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #include <signal.h>
 #include <utmp.h>
 #include <sys/time.h>
+#include	<sys/socket.h>
+#include	<netinet/in.h>
+#include	<netdb.h>
+#include <pwd.h>
 
 #define	NMAX	sizeof(ubuf.ut_name)
 #define	LMAX	sizeof(ubuf.ut_line)
@@ -20,18 +33,29 @@ char	*strcat();
 char	*strcpy();
 struct	utmp ubuf;
 int	signum[] = {SIGHUP, SIGINT, SIGQUIT, 0};
-char	me[NMAX + 1]	= "???";
+char	mebuf[NMAX + 1]	= "???";
+char	*me;
 char	*him;
+int	netme = 0;
+int	nethim = 0;
 char	*mytty;
 char	histty[32];
 char	ttybuf[32];
 char	*histtya;
+char	myhost[32];
+char	*hishost;
+struct hostent *hp;
+struct servent *sp;
+struct sockaddr_in sin;
+int	fds;
+char	buf[128];
+struct passwd *pwdent;
+FILE	*tf;
+int	logcnt;
 char	*ttyname();
 char	*rindex();
-int	logcnt;
 int	eof();
 int	timout();
-FILE	*tf;
 char	*getenv();
 
 main(argc, argv)
@@ -48,12 +72,47 @@ main(argc, argv)
 	struct tm *localtime();
 	struct tm *localclock = localtime( &clock );
 
-	if (argc < 2) {
+	me = mebuf;
+	if ((argc > 3) && (getuid() == 0) &&
+	    (strcmp("-f", argv[1]) == 0) &&
+	    (mytty = rindex(argv[2], '@'))) {
+		me = argv[2];
+		*mytty++ = '\0';
+		netme = 1;
+		argc -= 2;
+		argv += 2;
+	}
+	if (argc < 2 || argc > 3) {
 		fprintf(stderr, "Usage: write user [ttyname]\n");
 		exit(1);
 	}
 	him = argv[1];
-	if (argc > 2)
+	if ((!netme) && (hishost = rindex(him, '@'))) {
+		*hishost++ = '\0';
+		hp = gethostbyname(hishost);
+		if (hp == NULL) {
+			static struct hostent def;
+			static struct in_addr defaddr;
+			static char namebuf[128];
+			int inet_addr();
+
+			defaddr.s_addr = inet_addr(hishost);
+			if (defaddr.s_addr == -1) {
+				printf("unknown host: %s\n", hishost);
+				exit(1);
+			}
+			strcpy(namebuf, hishost);
+			def.h_name = namebuf;
+			def.h_addr = (char *)&defaddr;
+			def.h_length = sizeof (struct in_addr);
+			def.h_addrtype = AF_INET;
+			def.h_aliases = 0;
+			hp = &def;
+		}
+		nethim = 1;
+	}
+
+	if (argc == 3)
 		histtya = argv[2];
 	if ((uf = fopen("/etc/utmp", "r")) == NULL) {
 		perror("write: Can't open /etc/utmp");
@@ -61,22 +120,24 @@ main(argc, argv)
 			exit(10);
 		goto cont;
 	}
-	mytty = ttyname(2);
-	if (mytty == NULL) {
+	if (!netme) {
+	    mytty = ttyname(2);
+	    if (mytty == NULL) {
 		fprintf(stderr, "write: Can't find your tty\n");
 		exit(1);
-	}
-	if (stat(mytty, &stbuf) < 0) {
+	    }
+	    if (stat(mytty, &stbuf) < 0) {
 		perror("write: Can't stat your tty");
 		exit(1);
-	}
-	if ((stbuf.st_mode&020) == 0) {
+	    }
+	    if ((stbuf.st_mode&020) == 0) {
 		fprintf(stderr,
 			"write: You have write permission turned off\n");
 		if (!suser)
-			exit(1);
+		  exit(1);
+	    }
+	    mytty = rindex(mytty, '/') + 1;
 	}
-	mytty = rindex(mytty, '/') + 1;
 	if (histtya) {
 		strcpy(histty, "/dev/");
 		strcat(histty, histtya);
@@ -84,7 +145,7 @@ main(argc, argv)
 	while (fread((char *)&ubuf, sizeof(ubuf), 1, uf) == 1) {
 		if (ubuf.ut_name[0] == '\0')
 			continue;
-		if (strcmp(ubuf.ut_line, mytty)==0) {
+		if ((!netme) && strcmp(ubuf.ut_line, mytty)==0) {
 			for (i=0; i<NMAX; i++) {
 				c1 = ubuf.ut_name[i];
 				if (c1 == ' ')
@@ -94,6 +155,7 @@ main(argc, argv)
 					break;
 			}
 		}
+		if (nethim) goto nomat;
 		if (him[0] == '-' && him[1] == 0)
 			goto nomat;
 		for (i=0; i<NMAX; i++) {
@@ -126,35 +188,94 @@ main(argc, argv)
 		;
 	}
 	fclose(uf);
-	if (logcnt==0) {
+	if (!nethim) { 
+	    if (logcnt==0) {
 		fprintf(stderr, "write: %s not logged in%s\n", him,
 			histtya ? " on that tty" : "");
 		exit(1);
-	}
-	if (histtya==0 && logcnt > 1) {
+	    }
+	    if (histtya==0 && logcnt > 1) {
 		fprintf(stderr,
-		"write: %s logged in more than once ... writing to %s\n",
+			"write: %s logged in more than once ... writing to %s\n",
 			him, histty+5);
+	    }
 	}
 cont:
-	if (access(histty, 0) < 0) {
+	fclose(uf);
+	if((!netme) && (mebuf[0] == '?')) {
+	    pwdent = getpwuid(getuid());
+	    if (pwdent == NULL) {
+		printf("You don't exist. Go away.\n");
+		exit(-1);
+	    }
+	    strcpy(mebuf, pwdent->pw_name);
+	}
+	if (nethim) {
+		sp = getservbyname("write", "tcp");
+		if (sp == 0) {
+			printf("tcp/write: unknown service\n");
+			exit(1);
+		}
+		sin.sin_family = hp->h_addrtype;
+		bcopy(hp->h_addr, (char *)&sin.sin_addr, hp->h_length);
+		sin.sin_port = sp->s_port;
+		fds = socket(hp->h_addrtype, SOCK_STREAM, 0);
+		if (fds < 0) {
+			perror("socket");
+			exit(1);
+		}
+		if (connect(fds, (char *)&sin, sizeof (sin)) < 0) {
+			perror("connect");
+			close(fds);
+			exit(1);
+		}
+
+		write(fds, me, strlen(me));
+		write(fds, "@", 1);
+		gethostname(myhost, sizeof (myhost));
+		write(fds, myhost, strlen(myhost));
+		write(fds, " ", 1);
+		write(fds, him, strlen(him));
+		if (histtya) {
+			write(fds, " ", 1);
+			write(fds, histtya, strlen(histtya));
+		}
+		write(fds, "\r\n", 2);
+		sigs(eof);
+		tf = fdopen(fds, "r+");
+		while (1) {
+			if (fgets(buf, sizeof(buf), tf) == NULL) exit(1);
+			if (buf[0] == '\n') break;
+			write(1, buf, strlen(buf));
+		}
+	} else {
+	    if (access(histty, 0) < 0) {
 		fprintf(stderr, "write: No such tty\n");
 		exit(1);
-	}
-	signal(SIGALRM, timout);
-	alarm(5);
-	if ((tf = fopen(histty, "w")) == NULL) {
+	    }
+	    signal(SIGALRM, timout);
+	    alarm(5);
+	    if ((tf = fopen(histty, "w")) == NULL) {
 		fprintf(stderr, "write: Permission denied\n");
 		exit(1);
-	}
-	alarm(0);
-	sigs(eof);
-	{ char hostname[32];
-	  gethostname(hostname, sizeof (hostname));
-	  fprintf(tf,
-	      "\r\nMessage from %s@%s on %s at %d:%02d ...\r\n\007\007\007",
-	      me, hostname, mytty, localclock->tm_hour, localclock->tm_min);
-	fflush(tf);
+	    }
+	    alarm(0);
+	    sigs(eof);
+	    if (netme) {
+		printf("\n");
+		fflush(stdout);
+		fprintf(tf,
+		 "\r\nMessage from %s on %s at %d:%02d ...\r\n\007\007\007",
+		 me, mytty, localclock->tm_hour, localclock->tm_min);
+	    } else
+	    { char hostname[32];
+	      gethostname(hostname, sizeof (hostname));
+	      fprintf(tf,
+		 "\r\nMessage from %s@%s on %s at %d:%02d ...\r\n\007\007\007",
+		 me, hostname, mytty, localclock->tm_hour, localclock->tm_min);
+	    }
+	    fflush(tf);
+	    fds = fileno(tf);
 	}
 	for (;;) {
 		char buf[BUFSIZ];
@@ -162,7 +283,7 @@ cont:
 		i = read(0, buf, sizeof buf);
 		if (i <= 0)
 			eof();
-		if (buf[0] == '!') {
+		if ((!netme) && buf[0] == '!') {
 			buf[i] = 0;
 			ex(buf);
 			continue;
@@ -178,7 +299,8 @@ cont:
 			}
 
 			if (isprint(*bp) ||
-			    *bp == ' ' || *bp == '\t' || *bp == '\n') {
+			    *bp == ' ' || *bp == '\t' || *bp == '\n'
+			    || *bp == '\r') {
 				putc(*bp, tf);
 			} else {
 				putc('^', tf);
@@ -207,7 +329,10 @@ timout()
 eof()
 {
 
-	fprintf(tf, "EOF\r\n");
+	if (!nethim) {
+	    fprintf(tf, "EOF\r\n");
+	    fflush(tf);
+	}
 	exit(0);
 }
 
