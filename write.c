@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.15 1997-02-11 18:23:09 ghudson Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.16 1998-01-21 21:58:11 ghudson Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.15 1997-02-11 18:23:09 ghudson Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.16 1998-01-21 21:58:11 ghudson Exp $";
 #endif lint
 
 #ifndef	lint
@@ -32,8 +32,14 @@ static char *sccsid = "@(#)write.c	4.13 3/13/86";
 #define	NMAX	sizeof(ubuf.ut_name)
 #define	LMAX	sizeof(ubuf.ut_line)
 
-char	*strcat();
-char	*strcpy();
+#ifndef UTMP_FILE
+#ifdef _PATH_UTMP
+#define UTMP_FILE _PATH_UTMP
+#else
+#define UTMP_FILE "/etc/utmp"
+#endif
+#endif
+
 struct	utmp ubuf;
 int	signum[] = {SIGHUP, SIGINT, SIGQUIT, 0};
 char	mebuf[NMAX + 1]	= "???";
@@ -121,8 +127,8 @@ main(argc, argv)
 
 	if (argc == 3)
 		histtya = argv[2];
-	if ((uf = fopen("/etc/utmp", "r")) == NULL) {
-		perror("write: Can't open /etc/utmp");
+	if ((uf = fopen(UTMP_FILE, "r")) == NULL) {
+		perror("write: Can't open " UTMP_FILE);
 		if (histtya == 0)
 			exit(10);
 		goto cont;
