@@ -4,8 +4,9 @@ AC_INIT(main.c)
 AC_PROG_CC
 AC_PROG_INSTALL
 
-AC_CHECK_FUNCS(getutxent inet_aton)
 AC_SEARCH_LIBS(gethostbyname, nsl)
 AC_SEARCH_LIBS(socket, socket)
+AC_SEARCH_LIBS(inet_aton, resolv)
+AC_CHECK_FUNCS(getutxent inet_aton)
 
 AC_OUTPUT(Makefile)
