@@ -12,7 +12,7 @@
 char copyright[] =
 "@(#) Copyright (c) 1983 Regents of the University of California.\n\
  All rights reserved.\n";
-static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.4 1991-08-02 14:15:05 epeisach Exp $";
+static char *rcsid_writed_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/writed.c,v 1.5 1992-01-10 16:40:47 probe Exp $";
 #endif not lint
 
 #ifndef lint
@@ -27,6 +27,10 @@ static char sccsid[] = "@(#)writed.c	5.1 (Berkeley) 6/6/85";
 
 #include <stdio.h>
 #include <ctype.h>
+
+#if !defined(WRITE_PROG)
+#define WRITE_PROG "/usr/athena/bin/write"
+#endif
 
 main(argc, argv)
 	char *argv[];
@@ -66,7 +70,7 @@ main(argc, argv)
 	dup2(0, 1);
 	dup2(0, 2);
 #if (defined(vax) && !defined(ultrix) || defined(ibm032))
-	execv("/bin/write", av);
+	execv(WRITE_PROG, av);
 #else
 	execv("/usr/athena/bin/write", av);
 #endif
