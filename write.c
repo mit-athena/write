@@ -1,10 +1,10 @@
 /*
  *	$Source: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v $
- *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.5 1990-02-20 16:07:40 epeisach Exp $
+ *	$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.6 1991-02-26 17:20:06 epeisach Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.5 1990-02-20 16:07:40 epeisach Exp $";
+static char *rcsid_write_c = "$Header: /afs/dev.mit.edu/source/repository/athena/bin/write/write.c,v 1.6 1991-02-26 17:20:06 epeisach Exp $";
 #endif lint
 
 #ifndef	lint
@@ -346,7 +346,7 @@ eof()
 ex(bp)
 	char *bp;
 {
-	register i;
+	register int i;
 
 	sigs(SIG_IGN);
 	i = fork();
@@ -372,7 +372,7 @@ out:
 sigs(sig)
 	int (*sig)();
 {
-	register i;
+	register int i;
 
 	for (i=0; signum[i]; i++)
 		signal(signum[i], sig);
