@@ -1,9 +1,9 @@
 /*
- *	$Id: write.c,v 1.18 1999-01-22 23:15:32 ghudson Exp $
+ *	$Id: write.c,v 1.19 1999-06-01 19:02:41 ghudson Exp $
  */
 
 #ifndef lint
-static char *rcsid_write_c = "$Id: write.c,v 1.18 1999-01-22 23:15:32 ghudson Exp $";
+static char *rcsid_write_c = "$Id: write.c,v 1.19 1999-06-01 19:02:41 ghudson Exp $";
 #endif lint
 
 #ifndef	lint
@@ -266,7 +266,15 @@ cont:
 		sigs(eof);
 		tf = fdopen(fds, "r+");
 		while (1) {
-			if (fgets(buf, sizeof(buf), tf) == NULL) exit(1);
+			if (fgets(buf, sizeof(buf), tf) == NULL) {
+				if (ferror(tf))
+					perror("read");
+				else {
+					fprintf(stderr,
+						"Unexpected end of input\n");
+				}
+				exit(1);
+			}
 			if (buf[0] == '\n') break;
 			write(1, buf, strlen(buf));
 		}
